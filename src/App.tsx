@@ -16,7 +16,6 @@ import { FeedbackForm } from './components/NewsletterSignup';
 import { ScrollToTop } from './components/ScrollToTop';
 import { Footer } from './components/Footer';
 import { CryptoAnalysis } from './pages/CryptoAnalysis';
-import { Community } from './pages/Community';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
 import { CookiePolicy } from './pages/CookiePolicy';
@@ -196,13 +195,6 @@ function HomePage() {
                 <LineChart className="w-4 h-4" />
                 <span className="hidden sm:inline">Analysis</span>
               </Link>
-              <Link
-                to="/community"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-600"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span className="hidden sm:inline">Community</span>
-              </Link>
               <button
                 onClick={() => setShowFavorites(true)}
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-600"
@@ -332,7 +324,6 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/analysis" element={<CryptoAnalysis />} />
-        <Route path="/community" element={<Community />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/cookies" element={<CookiePolicy />} />
