@@ -12,7 +12,7 @@ import { AuthModal } from './components/AuthModal';
 import { UserMenu } from './components/UserMenu';
 import { ThemeToggle } from './components/ThemeToggle';
 import { NewsCarousel } from './components/NewsCarousel';
-import { NewsletterSignup } from './components/NewsletterSignup';
+import { FeedbackForm } from './components/NewsletterSignup';
 import { ScrollToTop } from './components/ScrollToTop';
 import { Footer } from './components/Footer';
 import { CryptoAnalysis } from './pages/CryptoAnalysis';
@@ -302,7 +302,7 @@ function HomePage() {
           </>
         )}
 
-        <NewsletterSignup />
+        <FeedbackForm />
       </main>
 
       <Footer />
