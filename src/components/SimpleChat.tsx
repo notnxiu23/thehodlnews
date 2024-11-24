@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, User, AlertCircle } from 'lucide-react';
-import ReconnectingWebSocket from 'reconnecting-websocket';
 import { ChatModerator } from '../utils/chatModeration';
 import toast from 'react-hot-toast';
 
@@ -12,63 +11,47 @@ interface Message {
   clientId: string;
 }
 
-const WS_URL = 'wss://ws.postman-echo.com/raw';
+const STORAGE_KEY = 'chat_messages';
 const CLIENT_ID = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+const MAX_MESSAGES = 100;
 
-const generateMessageId = (clientId: string) => {
-  return `${clientId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-};
+const moderator = new ChatModerator();
 
 export function SimpleChat() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+      console.error('Failed to load chat history:', error);
+      return [];
+    }
+  });
+  
   const [newMessage, setNewMessage] = useState('');
   const [username, setUsername] = useState(() => {
     const saved = localStorage.getItem('chat_username');
     return saved || `User${Math.floor(Math.random() * 10000)}`;
   });
-  const [isConnected, setIsConnected] = useState(false);
-  const wsRef = useRef<ReconnectingWebSocket | null>(null);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const processedMessages = useRef(new Set<string>());
-  const moderatorRef = useRef(new ChatModerator());
+  const broadcastChannel = useRef<BroadcastChannel | null>(null);
 
   useEffect(() => {
-    wsRef.current = new ReconnectingWebSocket(WS_URL);
-
-    wsRef.current.onopen = () => {
-      setIsConnected(true);
-      console.log('Connected to chat');
+    // Initialize BroadcastChannel for cross-tab communication
+    broadcastChannel.current = new BroadcastChannel('chat_channel');
+    
+    broadcastChannel.current.onmessage = (event) => {
+      const newMessage = event.data;
+      setMessages(prev => {
+        const updated = [...prev, newMessage].slice(-MAX_MESSAGES);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        return updated;
+      });
     };
-
-    wsRef.current.onclose = () => {
-      setIsConnected(false);
-      console.log('Disconnected from chat');
-    };
-
-    wsRef.current.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data) as Message;
-        
-        if (processedMessages.current.has(message.id)) {
-          return;
-        }
-
-        processedMessages.current.add(message.id);
-        setMessages(prev => [...prev, message]);
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      } catch (error) {
-        console.error('Failed to parse message:', error);
-      }
-    };
-
-    // Cleanup old user states periodically
-    const cleanupInterval = setInterval(() => {
-      moderatorRef.current.cleanup();
-    }, 60000); // Every minute
 
     return () => {
-      wsRef.current?.close();
-      clearInterval(cleanupInterval);
+      broadcastChannel.current?.close();
     };
   }, []);
 
@@ -76,12 +59,16 @@ export function SimpleChat() {
     localStorage.setItem('chat_username', username);
   }, [username]);
 
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !wsRef.current) return;
+    if (!newMessage.trim()) return;
 
     // Validate message through moderation
-    const validation = moderatorRef.current.validateMessage(newMessage, CLIENT_ID);
+    const validation = moderator.validateMessage(newMessage, CLIENT_ID);
     
     if (!validation.isValid) {
       toast.error(validation.reason || 'Message not allowed');
@@ -89,18 +76,24 @@ export function SimpleChat() {
     }
 
     const message: Message = {
-      id: generateMessageId(CLIENT_ID),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       text: newMessage.trim(),
       username,
       timestamp: Date.now(),
       clientId: CLIENT_ID
     };
 
-    processedMessages.current.add(message.id);
-    wsRef.current.send(JSON.stringify(message));
-    setMessages(prev => [...prev, message]);
+    // Update local state and storage
+    setMessages(prev => {
+      const updated = [...prev, message].slice(-MAX_MESSAGES);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+
+    // Broadcast to other tabs
+    broadcastChannel.current?.postMessage(message);
+    
     setNewMessage('');
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const formatTime = (timestamp: number) => {
@@ -122,7 +115,6 @@ export function SimpleChat() {
             placeholder="Your username"
             className="px-2 py-1 text-sm rounded bg-white/10 text-white placeholder-white/50 border border-white/20 focus:outline-none focus:border-white/40"
           />
-          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`} />
         </div>
       </div>
 
@@ -191,7 +183,7 @@ export function SimpleChat() {
           />
           <button
             type="submit"
-            disabled={!isConnected || !newMessage.trim()}
+            disabled={!newMessage.trim()}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
           >
             <Send className="w-5 h-5" />
