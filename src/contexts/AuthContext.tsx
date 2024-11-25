@@ -10,6 +10,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, firestore } from '../services/firebase';
+import toast from 'react-hot-toast';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -36,40 +37,75 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   async function signup(email: string, password: string, displayName: string) {
-    const { user } = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(user, { displayName });
-    await setDoc(doc(firestore, 'users', user.uid), {
-      email,
-      displayName,
-      createdAt: new Date().toISOString(),
-      preferences: {
-        favoriteCategories: [],
-        priceAlerts: [],
-        notifications: true
-      }
-    });
+    try {
+      const { user } = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(user, { displayName });
+      await setDoc(doc(firestore, 'users', user.uid), {
+        email,
+        displayName,
+        createdAt: new Date().toISOString(),
+        preferences: {
+          favoriteCategories: [],
+          priceAlerts: [],
+          notifications: true
+        }
+      });
+      toast.success('Account created successfully!');
+    } catch (error) {
+      const e = error as Error;
+      toast.error(e.message);
+      throw error;
+    }
   }
 
-  function login(email: string, password: string) {
-    return signInWithEmailAndPassword(auth, email, password);
+  async function login(email: string, password: string) {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast.success('Successfully logged in!');
+    } catch (error) {
+      const e = error as Error;
+      toast.error(e.message);
+      throw error;
+    }
   }
 
-  function logout() {
-    return signOut(auth);
+  async function logout() {
+    try {
+      await signOut(auth);
+      toast.success('Successfully logged out');
+    } catch (error) {
+      const e = error as Error;
+      toast.error(e.message);
+      throw error;
+    }
   }
 
-  function resetPassword(email: string) {
-    return sendPasswordResetEmail(auth, email);
+  async function resetPassword(email: string) {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast.success('Password reset email sent!');
+    } catch (error) {
+      const e = error as Error;
+      toast.error(e.message);
+      throw error;
+    }
   }
 
   async function updateUserProfile(displayName: string) {
     if (!currentUser) throw new Error('No user logged in');
-    await updateProfile(currentUser, { displayName });
-    await setDoc(doc(firestore, 'users', currentUser.uid), { displayName }, { merge: true });
+    try {
+      await updateProfile(currentUser, { displayName });
+      await setDoc(doc(firestore, 'users', currentUser.uid), { displayName }, { merge: true });
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      const e = error as Error;
+      toast.error(e.message);
+      throw error;
+    }
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
     });

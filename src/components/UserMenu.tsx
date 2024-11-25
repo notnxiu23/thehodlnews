@@ -16,11 +16,10 @@ export function UserMenu({ onOpenAuth }: UserMenuProps) {
   const handleLogout = async () => {
     try {
       await logout();
-      toast.success('Successfully logged out');
+      setIsMenuOpen(false);
     } catch (error) {
-      toast.error('Failed to log out');
+      console.error('Failed to log out:', error);
     }
-    setIsMenuOpen(false);
   };
 
   return (
@@ -31,33 +30,33 @@ export function UserMenu({ onOpenAuth }: UserMenuProps) {
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           <User className="w-4 h-4" />
-          Login
+          <span className="hidden sm:inline">Login</span>
         </button>
       ) : (
         <>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-600"
           >
             <User className="w-4 h-4" />
-            {currentUser.displayName || 'User'}
+            <span className="hidden sm:inline">{currentUser.displayName || 'User'}</span>
           </button>
 
           {isMenuOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10">
+            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-800 rounded-lg shadow-lg py-1 z-50">
               <button
                 onClick={() => {
                   setIsSettingsOpen(true);
                   setIsMenuOpen(false);
                 }}
-                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-dark-700"
               >
                 <Settings className="w-4 h-4" />
                 Settings
               </button>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-dark-700"
               >
                 <LogOut className="w-4 h-4" />
                 Logout
