@@ -30,7 +30,7 @@ export function DateFilter({
     <div className="flex items-center gap-4">
       <div className="flex items-center gap-2">
         <Calendar className="w-5 h-5 text-gray-500" />
-        <span className="text-sm text-gray-600">Time Range:</span>
+        <span className="text-sm text-gray-600 dark:text-white">Time Range:</span>
       </div>
       
       <div className="flex flex-wrap gap-2">

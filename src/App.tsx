@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
-import { Tag as TagIcon, X, Bookmark, LineChart, MessageCircle } from 'lucide-react';
+import { Tag as TagIcon, X, Bookmark, LineChart, MessageCircle, Laugh, Book } from 'lucide-react';
 import { CategoryFilter } from './components/CategoryFilter';
 import { DateFilter, type DateRange } from './components/DateFilter';
 import { NewsCard } from './components/NewsCard';
@@ -16,11 +16,14 @@ import { FeedbackForm } from './components/NewsletterSignup';
 import { ScrollToTop } from './components/ScrollToTop';
 import { Footer } from './components/Footer';
 import { CryptoAnalysis } from './pages/CryptoAnalysis';
+import { CryptoMemes } from './pages/CryptoMemes';
+import { Glossary } from './pages/Glossary';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
 import { CookiePolicy } from './pages/CookiePolicy';
 import { Contact } from './pages/Contact';
 import { CryptoCalculator } from './components/CryptoCalculator';
+import { LoadingAnimation } from './components/LoadingAnimation';
 import { fetchNews, fetchCryptoPrices } from './services/api';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { AuthProvider } from './contexts/AuthContext';
@@ -168,14 +171,13 @@ function HomePage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleToggleFavorite = useCallback((category: Category) => {
-    setPreferences(prev => ({
-      ...prev,
-      favoriteCategories: prev.favoriteCategories.includes(category)
-        ? prev.favoriteCategories.filter(c => c !== category)
-        : [...prev.favoriteCategories, category]
-    }));
-  }, [setPreferences]);
+  useEffect(() => {
+    handleSearch();
+  }, [searchQuery, selectedTag, dateRange, customStartDate, customEndDate, handleSearch]);
+
+  useEffect(() => {
+    loadNews();
+  }, [category, loadNews]);
 
   return (
     <>
@@ -190,14 +192,28 @@ function HomePage() {
             <div className="flex items-center gap-2 sm:gap-4">
               <Link
                 to="/analysis"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-600"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700"
               >
                 <LineChart className="w-4 h-4" />
                 <span className="hidden sm:inline">Analysis</span>
               </Link>
+              <Link
+                to="/memes"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700"
+              >
+                <Laugh className="w-4 h-4" />
+                <span className="hidden sm:inline">Memes</span>
+              </Link>
+              <Link
+                to="/glossary"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700"
+              >
+                <Book className="w-4 h-4" />
+                <span className="hidden sm:inline">Glossary</span>
+              </Link>
               <button
                 onClick={() => setShowFavorites(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-600"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700"
               >
                 <Bookmark className="w-4 h-4" />
                 <span className="hidden sm:inline">Favorites</span>
@@ -209,50 +225,40 @@ function HomePage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <div className="mb-6 sm:mb-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
           <PriceOverview />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
           <div className="lg:col-span-3 space-y-6">
-            <div className="space-y-4">
-              <SearchBar
-                value={searchQuery}
-                onChange={setSearchQuery}
-                onSubmit={handleSearch}
-              />
-              <DateFilter
-                selectedRange={dateRange}
-                onRangeChange={setDateRange}
-                customStartDate={customStartDate}
-                customEndDate={customEndDate}
-                onCustomDateChange={(start, end) => {
-                  setCustomStartDate(start);
-                  setCustomEndDate(end);
-                }}
-              />
-              {selectedTag && (
-                <div className="flex items-center gap-2">
-                  <TagIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                  <span className="text-sm text-gray-600 dark:text-gray-300">Filtered by tag:</span>
-                  <span className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm">
-                    {selectedTag}
-                    <button
-                      onClick={() => setSelectedTag(null)}
-                      className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </span>
-                </div>
-              )}
-            </div>
+            <SearchBar
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSubmit={handleSearch}
+            />
+            <DateFilter
+              selectedRange={dateRange}
+              onRangeChange={setDateRange}
+              customStartDate={customStartDate}
+              customEndDate={customEndDate}
+              onCustomDateChange={(start, end) => {
+                setCustomStartDate(start);
+                setCustomEndDate(end);
+              }}
+            />
             <CategoryFilter
               selectedCategory={category}
               onCategoryChange={setCategory}
               favoriteCategories={preferences.favoriteCategories}
-              onToggleFavorite={handleToggleFavorite}
+              onToggleFavorite={(category) => {
+                setPreferences(prev => ({
+                  ...prev,
+                  favoriteCategories: prev.favoriteCategories.includes(category)
+                    ? prev.favoriteCategories.filter(c => c !== category)
+                    : [...prev.favoriteCategories, category]
+                }));
+              }}
             />
           </div>
           <div className="lg:col-span-1">
@@ -261,17 +267,8 @@ function HomePage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                className="bg-white dark:bg-dark-800 rounded-xl shadow-lg p-4 animate-pulse"
-              >
-                <div className="aspect-video bg-gray-200 dark:bg-dark-700 rounded-lg mb-4" />
-                <div className="h-6 bg-gray-200 dark:bg-dark-700 rounded w-3/4 mb-2" />
-                <div className="h-4 bg-gray-200 dark:bg-dark-700 rounded w-1/2" />
-              </div>
-            ))}
+          <div className="flex items-center justify-center py-12">
+            <LoadingAnimation size="lg" text="Loading news..." />
           </div>
         ) : error ? (
           <ErrorMessage error={error} onRetry={loadNews} />
@@ -318,12 +315,32 @@ function HomePage() {
   );
 }
 
-export default function App() {
+function App() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-900">
+        <LoadingAnimation size="lg" text="Loading The HODL News..." />
+      </div>
+    );
+  }
+
   return (
     <AuthProvider>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/analysis" element={<CryptoAnalysis />} />
+        <Route path="/memes" element={<CryptoMemes />} />
+        <Route path="/glossary" element={<Glossary />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/cookies" element={<CookiePolicy />} />
@@ -332,3 +349,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+
+export default App;

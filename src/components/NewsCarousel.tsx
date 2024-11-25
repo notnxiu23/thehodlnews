@@ -31,7 +31,7 @@ export function NewsCarousel({ articles }: NewsCarouselProps) {
     <div className="relative h-[300px] sm:h-[400px] rounded-xl overflow-hidden">
       {articles.map((article, index) => (
         <div
-          key={article.url}
+          key={`${article.url}-${index}`}
           className={`absolute inset-0 transition-opacity duration-500 ${
             index === currentSlide ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
@@ -70,7 +70,7 @@ export function NewsCarousel({ articles }: NewsCarouselProps) {
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
         {articles.map((_, index) => (
           <button
-            key={index}
+            key={`indicator-${index}`}
             onClick={() => setCurrentSlide(index)}
             className={`w-2 h-2 rounded-full transition-colors ${
               index === currentSlide

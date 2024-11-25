@@ -15,14 +15,14 @@ export function PriceCard({ crypto }: PriceCardProps) {
   const isPositive = crypto.change24h >= 0;
 
   return (
-    <div className="bg-white dark:bg-dark-800 rounded-xl shadow-sm p-4 transition-colors">
+    <div className="bull-market-card bull-market-glow rounded-xl p-4 transition-all hover:scale-[1.02]">
       <div className="flex items-center justify-between mb-2">
         <span className="text-lg font-bold text-gray-900 dark:text-white">
           {crypto.symbol}/USD
         </span>
         <div
           className={`flex items-center gap-1 ${
-            isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+            isPositive ? 'text-bull-600 dark:text-bull-400' : 'text-red-600 dark:text-red-400'
           }`}
         >
           {isPositive ? (
