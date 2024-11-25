@@ -1,4 +1,4 @@
-import { useEffect, useState, memo } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchCryptoPrices } from '../services/api';
 import { PriceCard } from './PriceCard';
 import { PriceAlerts } from './PriceAlerts';
@@ -65,11 +65,11 @@ export function PriceOverview() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-        {[...Array(6)].map((_, i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
           <div
             key={i}
-            className="bg-white dark:bg-dark-800 rounded-xl shadow-sm p-4 animate-pulse"
+            className="market-card rounded-xl p-4 animate-pulse"
           >
             <div className="h-6 bg-gray-200 dark:bg-dark-700 rounded w-20 mb-2"></div>
             <div className="h-8 bg-gray-200 dark:bg-dark-700 rounded w-32 mb-2"></div>
@@ -93,8 +93,10 @@ export function PriceOverview() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Market Overview</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+          Market Overview
+        </h2>
         <PriceAlerts
           prices={prices}
           alerts={preferences.priceAlerts || []}
@@ -102,7 +104,7 @@ export function PriceOverview() {
           onRemoveAlert={handleRemoveAlert}
         />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {prices.map((crypto) => (
           <PriceCard key={crypto.symbol} crypto={crypto} />
         ))}
