@@ -4,8 +4,12 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { initNetlifyIdentity } from './services/netlify-identity';
 import App from './App';
 import './index.css';
+
+// Initialize Netlify Identity
+initNetlifyIdentity();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

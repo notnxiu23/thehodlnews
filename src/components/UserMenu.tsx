@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { LogOut, Settings, User } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 import { SettingsModal } from './SettingsModal';
 import toast from 'react-hot-toast';
 
@@ -11,22 +10,24 @@ interface UserMenuProps {
 export function UserMenu({ onOpenAuth }: UserMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const { currentUser, logout } = useAuth();
+  const user = window.netlifyIdentity.currentUser();
 
   const handleLogout = async () => {
     try {
-      await logout();
+      window.netlifyIdentity.logout();
       setIsMenuOpen(false);
+      toast.success('Logged out successfully');
     } catch (error) {
       console.error('Failed to log out:', error);
+      toast.error('Failed to log out');
     }
   };
 
   return (
     <div className="relative">
-      {!currentUser ? (
+      {!user ? (
         <button
-          onClick={onOpenAuth}
+          onClick={() => window.netlifyIdentity.open('login')}
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           <User className="w-4 h-4" />
@@ -39,7 +40,7 @@ export function UserMenu({ onOpenAuth }: UserMenuProps) {
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-600"
           >
             <User className="w-4 h-4" />
-            <span className="hidden sm:inline">{currentUser.displayName || 'User'}</span>
+            <span className="hidden sm:inline">{user.user_metadata.full_name || user.email}</span>
           </button>
 
           {isMenuOpen && (
