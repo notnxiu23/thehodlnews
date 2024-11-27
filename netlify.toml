@@ -1,0 +1,24 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[dev]
+  command = "npm run dev"
+  port = 5173
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[template.environment]
+  VITE_SITE_URL = "URL of your site"
+
+# Enable Netlify Identity
+[template.identity]
+  enable = true

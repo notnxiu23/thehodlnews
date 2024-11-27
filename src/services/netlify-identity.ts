@@ -1,42 +1,69 @@
-declare global {
-  interface Window {
-    netlifyIdentity: {
-      on: (event: string, callback: (user: any) => void) => void;
-      init: (opts?: { locale: string }) => void;
-      open: (tab?: 'login' | 'signup') => void;
-      close: () => void;
-      currentUser: () => any;
-      logout: () => void;
-    };
-  }
-}
+// Initialize Netlify Identity widget
+let netlifyIdentityInitialized = false;
 
-export const initNetlifyIdentity = () => {
-  const { netlifyIdentity } = window;
-
-  if (!netlifyIdentity) {
-    console.error('Netlify Identity not initialized');
+export async function initNetlifyIdentity(): Promise<void> {
+  if (netlifyIdentityInitialized) {
     return;
   }
 
-  netlifyIdentity.on('init', user => {
-    if (user) {
-      console.log('Logged in as:', user.email);
+  return new Promise((resolve, reject) => {
+    try {
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.init({
+          APIUrl: `${window.location.origin}/.netlify/identity`,
+          locale: 'en'
+        });
+        netlifyIdentityInitialized = true;
+        resolve();
+      } else {
+        reject(new Error('Netlify Identity not loaded'));
+      }
+    } catch (error) {
+      reject(error);
     }
   });
+}
 
-  netlifyIdentity.on('login', user => {
-    console.log('Logged in as:', user.email);
-    netlifyIdentity.close();
-  });
+export function getCurrentUser() {
+  if (!window.netlifyIdentity) {
+    return null;
+  }
+  return window.netlifyIdentity.currentUser();
+}
 
-  netlifyIdentity.on('logout', () => {
-    console.log('Logged out');
-  });
+export function openNetlifyModal(type: 'login' | 'signup') {
+  if (!window.netlifyIdentity) {
+    console.error('Netlify Identity not initialized');
+    return;
+  }
+  window.netlifyIdentity.open(type);
+}
 
-  netlifyIdentity.on('error', err => {
-    console.error('Authentication error:', err);
-  });
+export function closeNetlifyModal() {
+  if (!window.netlifyIdentity) {
+    return;
+  }
+  window.netlifyIdentity.close();
+}
 
-  netlifyIdentity.init();
-};
+export function logout() {
+  if (!window.netlifyIdentity) {
+    return;
+  }
+  window.netlifyIdentity.logout();
+}
+
+// Type definitions for Netlify Identity
+declare global {
+  interface Window {
+    netlifyIdentity: {
+      init: (params?: any) => void;
+      open: (type?: 'login' | 'signup') => void;
+      close: () => void;
+      currentUser: () => any;
+      logout: () => void;
+      on: (event: string, callback: Function) => void;
+      off: (event: string, callback: Function) => void;
+    };
+  }
+}
