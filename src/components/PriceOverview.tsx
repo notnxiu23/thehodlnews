@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchCryptoPrices } from '../services/api';
 import { PriceCard } from './PriceCard';
 import { PriceAlerts } from './PriceAlerts';
@@ -14,59 +14,50 @@ export function PriceOverview() {
     priceAlerts: [],
   });
 
-  useEffect(() => {
-    const loadPrices = async () => {
-      try {
-        const data = await fetchCryptoPrices();
-        setPrices(data);
-        setError(null);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch crypto prices';
-        setError(errorMessage);
-        console.error('Failed to fetch crypto prices:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadPrices();
-    const interval = setInterval(loadPrices, 30000);
-
-    return () => clearInterval(interval);
+  const loadPrices = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await fetchCryptoPrices();
+      setPrices(data);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to fetch prices:', err);
+      setError('Failed to load price data');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const handleAddAlert = (alert: Omit<PriceAlert, 'id' | 'createdAt'>) => {
-    try {
-      const newAlert: PriceAlert = {
-        ...alert,
-        id: Math.random().toString(36).substring(2),
-        createdAt: Date.now(),
-      };
+  useEffect(() => {
+    loadPrices();
+    const interval = setInterval(loadPrices, 30000); // Update every 30 seconds
+    return () => clearInterval(interval);
+  }, [loadPrices]);
 
-      setPreferences((prev) => ({
-        ...prev,
-        priceAlerts: [...(prev.priceAlerts || []), newAlert],
-      }));
-    } catch (err) {
-      console.error('Failed to add alert:', err);
-    }
+  const handleAddAlert = (alert: Omit<PriceAlert, 'id' | 'createdAt'>) => {
+    const newAlert: PriceAlert = {
+      ...alert,
+      id: Math.random().toString(36).substring(2),
+      createdAt: Date.now(),
+    };
+
+    setPreferences(prev => ({
+      ...prev,
+      priceAlerts: [...(prev.priceAlerts || []), newAlert],
+    }));
   };
 
   const handleRemoveAlert = (id: string) => {
-    try {
-      setPreferences((prev) => ({
-        ...prev,
-        priceAlerts: (prev.priceAlerts || []).filter((alert) => alert.id !== id),
-      }));
-    } catch (err) {
-      console.error('Failed to remove alert:', err);
-    }
+    setPreferences(prev => ({
+      ...prev,
+      priceAlerts: prev.priceAlerts.filter(alert => alert.id !== id),
+    }));
   };
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[...Array(8)].map((_, i) => (
           <div
             key={i}
             className="market-card rounded-xl p-4 animate-pulse"
@@ -99,12 +90,12 @@ export function PriceOverview() {
         </h2>
         <PriceAlerts
           prices={prices}
-          alerts={preferences.priceAlerts || []}
+          alerts={preferences.priceAlerts}
           onAddAlert={handleAddAlert}
           onRemoveAlert={handleRemoveAlert}
         />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {prices.map((crypto) => (
           <PriceCard key={crypto.symbol} crypto={crypto} />
         ))}

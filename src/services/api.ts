@@ -37,7 +37,6 @@ function extractTags(text: string): string[] {
     }
   });
 
-  // Extract coin mentions
   const coinPattern = /\b(btc|eth|sol|ada|xrp|doge|dot)\b/gi;
   const coins = text.match(coinPattern) || [];
   coins.forEach(coin => tags.add(coin.toLowerCase()));
@@ -73,20 +72,6 @@ function analyzeSentiment(text: string): number {
 
   return relevantWords > 0 ? score / relevantWords : 0;
 }
-
-// Add response interceptor for better error handling
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 429) {
-      throw new Error('Rate limit exceeded. Please try again later.');
-    }
-    if (error.response?.status === 401) {
-      throw new Error('API key invalid or expired.');
-    }
-    throw new Error('Failed to fetch data. Please try again.');
-  }
-);
 
 export async function fetchNews(category: Category): Promise<NewsArticle[]> {
   try {
@@ -148,7 +133,7 @@ export async function fetchNews(category: Category): Promise<NewsArticle[]> {
 
 export async function fetchCryptoPrices(): Promise<CryptoPrice[]> {
   try {
-    const symbols = ['BTC', 'ETH', 'XRP', 'SOL', 'ADA', 'DOGE'];
+    const symbols = ['BTC', 'ETH', 'XRP', 'SOL', 'ADA', 'DOGE', 'LINK', 'DOT'];
     const response = await api.get('/pricemultifull', {
       params: {
         fsyms: symbols.join(','),

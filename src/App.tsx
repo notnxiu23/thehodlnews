@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { LoadingAnimation } from './components/LoadingAnimation';
 import { HomePage } from './pages/HomePage';
@@ -9,6 +8,7 @@ import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
 import { CookiePolicy } from './pages/CookiePolicy';
 import { Contact } from './pages/Contact';
+import { useEffect, useState } from 'react';
 
 function App() {
   const [loading, setLoading] = useState(true);
