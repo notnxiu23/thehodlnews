@@ -59,49 +59,63 @@ export function MarketOverview() {
     return `$${value.toFixed(2)}`;
   };
 
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white dark:bg-dark-800 shadow-lg rounded-lg p-3 border border-gray-200 dark:border-dark-700">
+          <p className="text-sm font-medium text-gray-900 dark:text-white">
+            {payload[0].payload.name}
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            {payload[0].value}% Market Share
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="bg-white dark:bg-dark-800 rounded-xl shadow-sm p-6">
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 text-center">
         Market Overview
       </h3>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Market Stats */}
         <div className="space-y-6">
-          <div>
-            <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">
-              Market Statistics
-            </h4>
-            <div className="space-y-4">
-              <div className="bg-gray-50 dark:bg-dark-700 p-4 rounded-lg">
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  Total Market Cap
-                </div>
-                <div className="text-xl font-semibold text-gray-900 dark:text-white">
-                  {formatValue(globalData.total_market_cap.usd)}
-                </div>
+          <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4 text-center">
+            Market Statistics
+          </h4>
+          <div className="space-y-4">
+            <div className="bg-gray-50 dark:bg-dark-700 p-4 rounded-lg">
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                Total Market Cap
               </div>
-
-              <div className="bg-gray-50 dark:bg-dark-700 p-4 rounded-lg">
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  24h Trading Volume
-                </div>
-                <div className="text-xl font-semibold text-gray-900 dark:text-white">
-                  {formatValue(globalData.total_volume.usd)}
-                </div>
+              <div className="text-xl font-semibold text-gray-900 dark:text-white">
+                {formatValue(globalData.total_market_cap.usd)}
               </div>
+            </div>
 
-              <div className="bg-gray-50 dark:bg-dark-700 p-4 rounded-lg">
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  Market Cap Change (24h)
-                </div>
-                <div className={`text-xl font-semibold ${
-                  globalData.market_cap_change_percentage_24h_usd >= 0
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-red-600 dark:text-red-400'
-                }`}>
-                  {globalData.market_cap_change_percentage_24h_usd.toFixed(2)}%
-                </div>
+            <div className="bg-gray-50 dark:bg-dark-700 p-4 rounded-lg">
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                24h Trading Volume
+              </div>
+              <div className="text-xl font-semibold text-gray-900 dark:text-white">
+                {formatValue(globalData.total_volume.usd)}
+              </div>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-dark-700 p-4 rounded-lg">
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                Market Cap Change (24h)
+              </div>
+              <div className={`text-xl font-semibold ${
+                globalData.market_cap_change_percentage_24h_usd >= 0
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-red-600 dark:text-red-400'
+              }`}>
+                {globalData.market_cap_change_percentage_24h_usd.toFixed(2)}%
               </div>
             </div>
           </div>
@@ -109,7 +123,7 @@ export function MarketOverview() {
 
         {/* Market Dominance Chart */}
         <div className="h-80">
-          <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">
+          <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4 text-center">
             Market Dominance
           </h4>
           <ResponsiveContainer width="100%" height="100%">
@@ -130,22 +144,14 @@ export function MarketOverview() {
                   />
                 ))}
               </Pie>
-              <Tooltip 
-                formatter={(value: number) => `${value}%`}
-                contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  color: '#F3F4F6'
-                }}
-              />
+              <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
         </div>
 
         {/* Fear & Greed Index */}
         <div className="space-y-4">
-          <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">
+          <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4 text-center">
             Market Sentiment
           </h4>
           <FearGreedIndex />
