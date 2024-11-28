@@ -1,4 +1,5 @@
 import { ExternalLink, TrendingUp, TrendingDown, Minus, Tag, Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useFavorites } from '../hooks/useFavorites';
 import { useTheme } from '../contexts/ThemeContext';
 import toast from 'react-hot-toast';
@@ -44,10 +45,12 @@ function SentimentIndicator({ sentiment }: { sentiment: number }) {
 const fallbackImage = 'https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=800';
 
 export function NewsCard({ article, onTagClick }: NewsCardProps) {
+  const navigate = useNavigate();
   const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
   const { theme } = useTheme();
 
-  const handleToggleFavorite = () => {
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
       if (isFavorite(article)) {
         removeFromFavorites(article);
@@ -59,6 +62,10 @@ export function NewsCard({ article, onTagClick }: NewsCardProps) {
     } catch (error) {
       toast.error('Failed to update favorites');
     }
+  };
+
+  const handleReadMore = () => {
+    navigate('/article', { state: { article } });
   };
 
   const accentClass = theme === 'bull' 
@@ -123,7 +130,10 @@ export function NewsCard({ article, onTagClick }: NewsCardProps) {
             {article.tags.map((tag) => (
               <button
                 key={tag}
-                onClick={() => onTagClick?.(tag)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTagClick?.(tag);
+                }}
                 className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs sm:text-sm transition-colors ${tagClass}`}
               >
                 <Tag className="w-3 h-3" />
@@ -134,14 +144,12 @@ export function NewsCard({ article, onTagClick }: NewsCardProps) {
         )}
         
         <div className="flex items-center justify-between mt-auto pt-4">
-          <a
-            href={article.url}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={handleReadMore}
             className={`inline-flex items-center gap-2 font-medium text-sm sm:text-base hover:opacity-80 ${accentClass}`}
           >
             Read More <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
-          </a>
+          </button>
           <SentimentIndicator sentiment={article.sentiment} />
         </div>
       </div>

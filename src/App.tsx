@@ -8,6 +8,7 @@ import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
 import { CookiePolicy } from './pages/CookiePolicy';
 import { Contact } from './pages/Contact';
+import { ArticlePage } from './pages/ArticlePage';
 import { useEffect, useState } from 'react';
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
       <Route path="/terms" element={<TermsOfService />} />
       <Route path="/cookies" element={<CookiePolicy />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="/article" element={<ArticlePage />} />
     </Routes>
   );
 }
