@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { schemeSet3 } from 'd3-scale-chromatic';
+import { schemeSet3 } from 'd3';
 import { Loader } from 'lucide-react';
 import { getGlobalData, type GlobalData } from '../services/coingecko';
+import { FearGreedIndex } from './FearGreedIndex';
 
 export function MarketOverview() {
   const [globalData, setGlobalData] = useState<GlobalData | null>(null);
@@ -64,43 +65,7 @@ export function MarketOverview() {
         Market Overview
       </h3>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Market Dominance Chart */}
-        <div className="h-80">
-          <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">
-            Market Dominance
-          </h4>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={dominanceData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                label={({ name, value }) => `${name} ${value}%`}
-              >
-                {dominanceData.map((_, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={schemeSet3[index % schemeSet3.length]} 
-                  />
-                ))}
-              </Pie>
-              <Tooltip 
-                formatter={(value: number) => `${value}%`}
-                contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  color: '#F3F4F6'
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Market Stats */}
         <div className="space-y-6">
           <div>
@@ -140,6 +105,50 @@ export function MarketOverview() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Market Dominance Chart */}
+        <div className="h-80">
+          <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">
+            Market Dominance
+          </h4>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={dominanceData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                label={({ name, value }) => `${name} ${value}%`}
+              >
+                {dominanceData.map((_, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={schemeSet3[index % schemeSet3.length]} 
+                  />
+                ))}
+              </Pie>
+              <Tooltip 
+                formatter={(value: number) => `${value}%`}
+                contentStyle={{
+                  backgroundColor: '#1F2937',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  color: '#F3F4F6'
+                }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Fear & Greed Index */}
+        <div className="space-y-4">
+          <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">
+            Market Sentiment
+          </h4>
+          <FearGreedIndex />
         </div>
       </div>
     </div>

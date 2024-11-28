@@ -6,9 +6,9 @@ interface CryptoCalculatorProps {
   prices: CryptoPrice[];
 }
 
-export function CryptoCalculator({ prices = [] }: CryptoCalculatorProps) {
+export function CryptoCalculator({ prices }: CryptoCalculatorProps) {
   const [amount, setAmount] = useState<string>('1');
-  const [fromCrypto, setFromCrypto] = useState<string>('BTC');
+  const [fromCrypto, setFromCrypto] = useState<string>(prices[0]?.symbol || 'BTC');
   const [toFiat, setToFiat] = useState<string>('USD');
   const [result, setResult] = useState<number>(0);
 
@@ -28,12 +28,10 @@ export function CryptoCalculator({ prices = [] }: CryptoCalculatorProps) {
   };
 
   useEffect(() => {
-    if (prices.length > 0) {
-      const cryptoPrice = prices.find(p => p.symbol === fromCrypto)?.price || 0;
-      const fiatRate = fiatRates[toFiat as keyof typeof fiatRates];
-      const calculatedResult = parseFloat(amount || '0') * cryptoPrice * fiatRate;
-      setResult(calculatedResult);
-    }
+    const cryptoPrice = prices.find(p => p.symbol === fromCrypto)?.price || 0;
+    const fiatRate = fiatRates[toFiat as keyof typeof fiatRates];
+    const calculatedResult = parseFloat(amount || '0') * cryptoPrice * fiatRate;
+    setResult(calculatedResult);
   }, [amount, fromCrypto, toFiat, prices]);
 
   const formatFiatAmount = (amount: number, currency: string) => {

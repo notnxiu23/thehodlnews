@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { LineChart, Laugh, Book, User, Calculator } from 'lucide-react';
+import { LineChart, Laugh, Book, User } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { UserMenu } from './UserMenu';
 import { useState } from 'react';
@@ -24,14 +24,7 @@ export function Header() {
               className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-600"
             >
               <LineChart className="w-4 h-4" />
-              <span className="sm:hidden lg:inline">Crypto Analysis</span>
-            </Link>
-            <Link
-              to="/tools"
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-600"
-            >
-              <Calculator className="w-4 h-4" />
-              <span className="sm:hidden lg:inline">Tools</span>
+              <span className="sm:hidden lg:inline">Analysis</span>
             </Link>
             <Link
               to="/memes"

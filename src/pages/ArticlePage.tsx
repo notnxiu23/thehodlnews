@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useFavorites } from '../hooks/useFavorites';
 import { useTheme } from '../contexts/ThemeContext';
 import { ArticleSummarizer } from '../components/ArticleSummarizer';
-import { ShareButtons } from '../components/ShareButtons';
 import toast from 'react-hot-toast';
 import type { NewsArticle } from '../types';
 
@@ -100,27 +99,20 @@ export function ArticlePage() {
           </div>
 
           <div className="p-6 sm:p-8">
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                <div className="flex items-center gap-2">
-                  <Globe className="w-4 h-4" />
-                  <span className="font-medium text-indigo-600 dark:text-indigo-400">
-                    {article.source.name}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  <time dateTime={publishDate.toISOString()} title={publishDate.toLocaleString()}>
-                    {timeAgo}
-                  </time>
-                </div>
-                <SentimentIndicator sentiment={article.sentiment} />
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-6">
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                  {article.source.name}
+                </span>
               </div>
-              <ShareButtons
-                url={article.url}
-                title={article.title}
-                source={article.source.name}
-              />
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <time dateTime={publishDate.toISOString()} title={publishDate.toLocaleString()}>
+                  {timeAgo}
+                </time>
+              </div>
+              <SentimentIndicator sentiment={article.sentiment} />
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6">

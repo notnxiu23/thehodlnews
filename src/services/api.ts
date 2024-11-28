@@ -1,19 +1,14 @@
 import axios from 'axios';
-import type { Category, NewsArticle, CryptoPrice, TrendingTopic, CryptoData, TimeRange } from '../types';
+import type { Category, NewsArticle, CryptoPrice, TrendingTopic } from '../types';
 
 const CRYPTO_BASE_URL = 'https://min-api.cryptocompare.com/data';
 const CRYPTO_API_KEY = 'd7019dd9c4be2753e8f196ef673f196992f778b204bfc91aa84e0b6b80d17529';
-const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3';
 
 const api = axios.create({
   baseURL: CRYPTO_BASE_URL,
   headers: {
     'Authorization': `Apikey ${CRYPTO_API_KEY}`
   }
-});
-
-const coingecko = axios.create({
-  baseURL: COINGECKO_API_URL
 });
 
 // Extract relevant tags from article text
@@ -122,17 +117,17 @@ export async function fetchNews(category: Category): Promise<NewsArticle[]> {
       title: article.title,
       description: article.body,
       url: article.url,
-      urlToImage: article.imageurl || 'https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=800',
+      urlToImage: article.imageurl,
       publishedAt: article.published_on * 1000,
       source: {
-        name: article.source_info?.name || article.source
+        name: article.source
       },
       sentiment: analyzeSentiment(article.title + ' ' + article.body),
       tags: extractTags(article.title + ' ' + article.body)
     }));
   } catch (error) {
     console.error('Error fetching news:', error);
-    throw new Error('Failed to fetch news articles');
+    throw error;
   }
 }
 
@@ -148,7 +143,7 @@ export async function fetchCryptoPrices(): Promise<CryptoPrice[]> {
     });
 
     if (!response.data?.RAW) {
-      return [];
+      throw new Error('Invalid response format from price API');
     }
 
     return Object.entries(response.data.RAW).map(([symbol, data]: [string, any]) => ({
@@ -160,66 +155,58 @@ export async function fetchCryptoPrices(): Promise<CryptoPrice[]> {
     }));
   } catch (error) {
     console.error('Error fetching prices:', error);
-    return [];
+    throw error;
   }
 }
 
-export async function fetchCryptoList(): Promise<CryptoData[]> {
+export async function fetchTrendingTopics(): Promise<TrendingTopic[]> {
   try {
-    const response = await coingecko.get('/coins/markets', {
+    const response = await api.get('/v2/news/toplist', {
       params: {
-        vs_currency: 'usd',
-        order: 'market_cap_desc',
-        per_page: 100,
-        sparkline: false,
-        price_change_percentage: '24h'
+        sortOrder: 'viral',
+        lang: 'EN',
+        limit: 10,
+        api_key: CRYPTO_API_KEY
       }
     });
 
-    return response.data.map((coin: any) => ({
-      id: coin.id,
-      name: coin.name,
-      symbol: coin.symbol,
-      image: coin.image,
-      price: coin.current_price,
-      marketCap: coin.market_cap,
-      volume24h: coin.total_volume,
-      change24h: coin.price_change_percentage_24h,
-      circulatingSupply: coin.circulating_supply,
-      maxSupply: coin.max_supply,
-      explorerUrl: `https://www.coingecko.com/en/coins/${coin.id}`
-    }));
-  } catch (error) {
-    console.error('Error fetching crypto list:', error);
-    return [];
-  }
-}
+    if (!response.data?.Data?.length) {
+      return [];
+    }
 
-export async function fetchCryptoHistory(id: string, timeRange: TimeRange): Promise<{ timestamp: number; price: number; }[]> {
-  try {
-    const days = {
-      '24h': 1,
-      '7d': 7,
-      '30d': 30,
-      '90d': 90,
-      '1y': 365,
-      'all': 'max'
-    }[timeRange];
+    const topics = new Map<string, { count: number; sentiment: number; }>();
+    
+    response.data.Data.forEach((article: any) => {
+      if (!article.title) return;
+      
+      const words = article.title
+        .toLowerCase()
+        .split(/\W+/)
+        .filter((word: string) => word.length > 3 && !['this', 'that', 'with', 'from'].includes(word));
 
-    const response = await coingecko.get(`/coins/${id}/market_chart`, {
-      params: {
-        vs_currency: 'usd',
-        days,
-        interval: timeRange === '24h' ? 'hourly' : 'daily'
-      }
+      const sentiment = analyzeSentiment(article.title + ' ' + article.body);
+
+      words.forEach((word: string) => {
+        if (!topics.has(word)) {
+          topics.set(word, { count: 0, sentiment: 0 });
+        }
+        const topic = topics.get(word)!;
+        topic.count++;
+        topic.sentiment += sentiment;
+      });
     });
 
-    return response.data.prices.map(([timestamp, price]: [number, number]) => ({
-      timestamp,
-      price
-    }));
+    return Array.from(topics.entries())
+      .map(([topic, data]) => ({
+        topic,
+        sentiment: data.sentiment / data.count,
+        volume: data.count,
+        change24h: Math.random() * 200 - 100 // Simulated change
+      }))
+      .sort((a, b) => b.volume - a.volume)
+      .slice(0, 5);
   } catch (error) {
-    console.error('Error fetching crypto history:', error);
-    return [];
+    console.error('Error in fetchTrendingTopics:', error);
+    throw error;
   }
 }

@@ -1,8 +1,7 @@
-import { ExternalLink, TrendingUp, TrendingDown, Minus, Tag, Heart, Share2 } from 'lucide-react';
+import { ExternalLink, TrendingUp, TrendingDown, Minus, Tag, Heart, Twitter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useFavorites } from '../hooks/useFavorites';
 import { useTheme } from '../contexts/ThemeContext';
-import { ShareButtons } from './ShareButtons';
 import toast from 'react-hot-toast';
 import type { NewsArticle } from '../types';
 
@@ -67,6 +66,13 @@ export function NewsCard({ article, onTagClick }: NewsCardProps) {
 
   const handleReadMore = () => {
     navigate('/article', { state: { article } });
+  };
+
+  const handleShareTwitter = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const text = `${article.title}\n\nFound on The HODL News`;
+    const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(article.url)}`;
+    window.open(shareUrl, '_blank');
   };
 
   const accentClass = theme === 'bull' 
@@ -150,13 +156,15 @@ export function NewsCard({ article, onTagClick }: NewsCardProps) {
               onClick={handleReadMore}
               className={`inline-flex items-center gap-2 font-medium text-sm sm:text-base hover:opacity-80 uppercase ${accentClass}`}
             >
-              Read More <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
+              READ MORE <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-            <ShareButtons
-              url={article.url}
-              title={article.title}
-              source={article.source.name}
-            />
+            <button
+              onClick={handleShareTwitter}
+              className="p-2 text-gray-600 hover:text-[#1DA1F2] dark:text-gray-400 dark:hover:text-[#1DA1F2] transition-colors"
+              title="Share on Twitter"
+            >
+              <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
           </div>
           <SentimentIndicator sentiment={article.sentiment} />
         </div>

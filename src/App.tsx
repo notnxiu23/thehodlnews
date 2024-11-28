@@ -4,7 +4,6 @@ import { HomePage } from './pages/HomePage';
 import { CryptoAnalysis } from './pages/CryptoAnalysis';
 import { CryptoMemes } from './pages/CryptoMemes';
 import { Glossary } from './pages/Glossary';
-import { Tools } from './pages/Tools';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
 import { CookiePolicy } from './pages/CookiePolicy';
@@ -35,7 +34,6 @@ function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/analysis" element={<CryptoAnalysis />} />
-      <Route path="/tools" element={<Tools />} />
       <Route path="/memes" element={<CryptoMemes />} />
       <Route path="/glossary" element={<Glossary />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />

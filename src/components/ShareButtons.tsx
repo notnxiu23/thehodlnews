@@ -1,52 +1,60 @@
-import { Twitter, Copy, Check } from 'lucide-react';
+import { Share2, Copy, Twitter } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 interface ShareButtonsProps {
   url: string;
   title: string;
-  source: string;
 }
 
-export function ShareButtons({ url, title, source }: ShareButtonsProps) {
-  const [copied, setCopied] = useState(false);
-  const shareText = `${title}\n\nShared by The HODL News`;
-  const encodedShareText = encodeURIComponent(shareText);
-  const encodedUrl = encodeURIComponent(url);
+export function ShareButtons({ url, title }: ShareButtonsProps) {
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(url);
-      setCopied(true);
       toast.success('Link copied to clipboard');
-      setTimeout(() => setCopied(false), 2000);
+      setIsOpen(false);
     } catch (error) {
       toast.error('Failed to copy link');
     }
   };
 
+  const handleShareTwitter = () => {
+    const text = `${title}\n\nFound on The HODL News`;
+    const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    window.open(shareUrl, '_blank');
+    setIsOpen(false);
+  };
+
   return (
-    <div className="flex items-center gap-2">
-      <a
-        href={`https://twitter.com/intent/tweet?text=${encodedShareText}&url=${encodedUrl}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="p-2 text-gray-600 hover:text-blue-400 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
-        title="Share on Twitter"
-      >
-        <Twitter className="w-5 h-5" />
-      </a>
+    <div className="relative">
       <button
-        onClick={handleCopyLink}
-        className="p-2 text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors"
-        title="Copy link"
+        onClick={() => setIsOpen(!isOpen)}
+        className="p-2 text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+        title="Share"
       >
-        {copied ? (
-          <Check className="w-5 h-5 text-green-500" />
-        ) : (
-          <Copy className="w-5 h-5" />
-        )}
+        <Share2 className="w-5 h-5" />
       </button>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-800 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 p-2 z-50">
+          <button
+            onClick={handleCopyLink}
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
+          >
+            <Copy className="w-4 h-4" />
+            Copy Link
+          </button>
+          <button
+            onClick={handleShareTwitter}
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
+          >
+            <Twitter className="w-4 h-4" />
+            Share on Twitter
+          </button>
+        </div>
+      )}
     </div>
   );
 }
