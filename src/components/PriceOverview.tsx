@@ -3,6 +3,7 @@ import { fetchCryptoPrices } from '../services/api';
 import { PriceCard } from './PriceCard';
 import { PriceAlerts } from './PriceAlerts';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { LoadingAnimation } from './LoadingAnimation';
 import type { CryptoPrice, PriceAlert, UserPreferences } from '../types';
 
 export function PriceOverview() {
@@ -18,11 +19,12 @@ export function PriceOverview() {
     try {
       setLoading(true);
       const data = await fetchCryptoPrices();
-      setPrices(data);
+      setPrices(data || []);
       setError(null);
     } catch (err) {
       console.error('Failed to fetch prices:', err);
       setError('Failed to load price data');
+      setPrices([]);
     } finally {
       setLoading(false);
     }
@@ -88,12 +90,14 @@ export function PriceOverview() {
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
           Market Overview
         </h2>
-        <PriceAlerts
-          prices={prices}
-          alerts={preferences.priceAlerts}
-          onAddAlert={handleAddAlert}
-          onRemoveAlert={handleRemoveAlert}
-        />
+        {prices.length > 0 && (
+          <PriceAlerts
+            prices={prices}
+            alerts={preferences.priceAlerts}
+            onAddAlert={handleAddAlert}
+            onRemoveAlert={handleRemoveAlert}
+          />
+        )}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {prices.map((crypto) => (

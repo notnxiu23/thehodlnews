@@ -1,7 +1,8 @@
-import { ExternalLink, TrendingUp, TrendingDown, Minus, Tag, Heart } from 'lucide-react';
+import { ExternalLink, TrendingUp, TrendingDown, Minus, Tag, Heart, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useFavorites } from '../hooks/useFavorites';
 import { useTheme } from '../contexts/ThemeContext';
+import { ShareButtons } from './ShareButtons';
 import toast from 'react-hot-toast';
 import type { NewsArticle } from '../types';
 
@@ -144,12 +145,19 @@ export function NewsCard({ article, onTagClick }: NewsCardProps) {
         )}
         
         <div className="flex items-center justify-between mt-auto pt-4">
-          <button
-            onClick={handleReadMore}
-            className={`inline-flex items-center gap-2 font-medium text-sm sm:text-base hover:opacity-80 ${accentClass}`}
-          >
-            Read More <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleReadMore}
+              className={`inline-flex items-center gap-2 font-medium text-sm sm:text-base hover:opacity-80 uppercase ${accentClass}`}
+            >
+              Read More <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+            <ShareButtons
+              url={article.url}
+              title={article.title}
+              source={article.source.name}
+            />
+          </div>
           <SentimentIndicator sentiment={article.sentiment} />
         </div>
       </div>

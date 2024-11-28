@@ -13,6 +13,7 @@ import { Footer } from '../components/Footer';
 import { NewsCarousel } from '../components/NewsCarousel';
 import { FeedbackForm } from '../components/NewsletterSignup';
 import { CryptoCalculator } from '../components/CryptoCalculator';
+import { LoadingAnimation } from '../components/LoadingAnimation';
 import { fetchNews, fetchCryptoPrices } from '../services/api';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import type { Category, NewsArticle, ErrorState, UserPreferences, CryptoPrice } from '../types';
@@ -45,6 +46,8 @@ export function HomePage() {
     startDate: Date | null,
     endDate: Date | null
   ) => {
+    if (!articles || articles.length === 0) return [];
+    
     let filtered = articles;
 
     if (query.trim()) {
@@ -123,6 +126,8 @@ export function HomePage() {
         message: error.message,
         code: 'FETCH_ERROR'
       });
+      setArticles([]);
+      setFilteredArticles([]);
     } finally {
       setLoading(false);
     }
@@ -131,9 +136,10 @@ export function HomePage() {
   const loadPrices = useCallback(async () => {
     try {
       const data = await fetchCryptoPrices();
-      setPrices(data);
+      setPrices(data || []);
     } catch (error) {
       console.error('Failed to fetch prices:', error);
+      setPrices([]);
     }
   }, []);
 
@@ -209,13 +215,13 @@ export function HomePage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+            <LoadingAnimation size="lg" text="Loading news..." />
           </div>
         ) : error ? (
           <ErrorMessage error={error} onRetry={loadNews} />
         ) : (
           <>
-            {articles.length > 0 && (
+            {articles && articles.length > 0 && (
               <div className="mb-8">
                 <NewsCarousel articles={articles.slice(0, 5)} />
               </div>

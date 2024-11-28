@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { schemeSet3 } from 'd3';
+import { schemeSet3 } from 'd3-scale-chromatic';
 import { Loader } from 'lucide-react';
 import { getGlobalData, type GlobalData } from '../services/coingecko';
 
