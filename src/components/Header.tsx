@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { LineChart, Laugh, Book, User } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { UserMenu } from './UserMenu';
 import { useState } from 'react';
@@ -10,9 +9,9 @@ export function Header() {
 
   const navItems = [
     { to: "/", label: "Home" },
-    { to: "/analysis", label: "Analysis", icon: <LineChart className="w-4 h-4" /> },
-    { to: "/memes", label: "Memes", icon: <Laugh className="w-4 h-4" /> },
-    { to: "/glossary", label: "Glossary", icon: <Book className="w-4 h-4" /> },
+    { to: "/analysis", label: "Analysis" },
+    { to: "/memes", label: "Memes" },
+    { to: "/glossary", label: "Glossary" },
   ];
 
   return (
@@ -40,20 +39,6 @@ export function Header() {
             ))}
           </div>
 
-          {/* Mobile Navigation */}
-          <div className="flex md:hidden items-center space-x-1">
-            {navItems.slice(1).map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="p-2 text-white hover:bg-indigo-500 rounded-md transition-colors"
-                title={item.label}
-              >
-                {item.icon}
-              </Link>
-            ))}
-          </div>
-
           {/* Right Section */}
           <div className="flex items-center space-x-4">
             <ThemeToggle />
@@ -65,8 +50,8 @@ export function Header() {
       {/* Secondary Navigation - Mobile Only */}
       <div className="md:hidden border-t border-indigo-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-3">
-            <div className="flex items-center space-x-4">
+          <div className="flex justify-center py-3">
+            <div className="flex items-center justify-center space-x-6">
               {navItems.map((item) => (
                 <Link
                   key={item.to}
