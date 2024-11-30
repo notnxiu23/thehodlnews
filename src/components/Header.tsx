@@ -8,41 +8,74 @@ import { AuthModal } from './AuthModal';
 export function Header() {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  const navItems = [
+    { to: "/", label: "Home" },
+    { to: "/analysis", label: "Analysis", icon: <LineChart className="w-4 h-4" /> },
+    { to: "/memes", label: "Memes", icon: <Laugh className="w-4 h-4" /> },
+    { to: "/glossary", label: "Glossary", icon: <Book className="w-4 h-4" /> },
+  ];
+
   return (
-    <header className="bg-white dark:bg-dark-800 shadow-sm sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-4 gap-4">
+    <header className="bg-indigo-600 text-white">
+      {/* Main Navigation */}
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
           <Link to="/" className="flex items-center">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-indigo-600 dark:text-indigo-400 tracking-tight">
+            <h1 className="text-2xl font-bold text-white tracking-tight">
               The HODL News
             </h1>
           </Link>
 
-          <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
-            <Link
-              to="/analysis"
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-600"
-            >
-              <LineChart className="w-4 h-4" />
-              <span className="sm:hidden lg:inline">Analysis</span>
-            </Link>
-            <Link
-              to="/memes"
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-600"
-            >
-              <Laugh className="w-4 h-4" />
-              <span className="sm:hidden lg:inline">Memes</span>
-            </Link>
-            <Link
-              to="/glossary"
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-600"
-            >
-              <Book className="w-4 h-4" />
-              <span className="sm:hidden lg:inline">Glossary</span>
-            </Link>
-            <div className="flex items-center gap-2 ml-auto sm:ml-0">
-              <ThemeToggle />
-              <UserMenu onOpenAuth={() => setShowAuthModal(true)} />
+          {/* Primary Navigation */}
+          <div className="hidden md:flex items-center space-x-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500 rounded-md transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="flex md:hidden items-center space-x-1">
+            {navItems.slice(1).map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="p-2 text-white hover:bg-indigo-500 rounded-md transition-colors"
+                title={item.label}
+              >
+                {item.icon}
+              </Link>
+            ))}
+          </div>
+
+          {/* Right Section */}
+          <div className="flex items-center space-x-4">
+            <ThemeToggle />
+            <UserMenu onOpenAuth={() => setShowAuthModal(true)} />
+          </div>
+        </div>
+      </nav>
+
+      {/* Secondary Navigation - Mobile Only */}
+      <div className="md:hidden border-t border-indigo-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-3">
+            <div className="flex items-center space-x-4">
+              {navItems.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className="text-sm text-white hover:text-indigo-100 transition-colors"
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
           </div>
         </div>
