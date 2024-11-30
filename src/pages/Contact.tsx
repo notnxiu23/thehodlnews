@@ -1,5 +1,5 @@
 import { BackButton } from '../components/BackButton';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Mail, Send } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -38,36 +38,16 @@ export function Contact() {
           <div className="prose dark:prose-invert">
             <p>
               Have questions, suggestions, or need assistance? We're here to help!
-              Feel free to reach out to us using any of the following methods:
+              Feel free to reach out to us using the contact form or email:
             </p>
           </div>
 
-          <div className="mt-8 space-y-6">
+          <div className="mt-8">
             <div className="flex items-start gap-4">
               <Mail className="w-6 h-6 text-indigo-600 dark:text-indigo-400 mt-1" />
               <div>
                 <h3 className="font-medium text-gray-900 dark:text-white">Email</h3>
                 <p className="text-gray-600 dark:text-gray-300">support@thehodlnews.com</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <Phone className="w-6 h-6 text-indigo-600 dark:text-indigo-400 mt-1" />
-              <div>
-                <h3 className="font-medium text-gray-900 dark:text-white">Phone</h3>
-                <p className="text-gray-600 dark:text-gray-300">+1 (555) 123-4567</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <MapPin className="w-6 h-6 text-indigo-600 dark:text-indigo-400 mt-1" />
-              <div>
-                <h3 className="font-medium text-gray-900 dark:text-white">Address</h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  123 Blockchain Street<br />
-                  Crypto Valley, CV 12345<br />
-                  United States
-                </p>
               </div>
             </div>
           </div>

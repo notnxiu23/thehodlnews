@@ -10,6 +10,7 @@ export function Header() {
   const navItems = [
     { to: "/", label: "Home" },
     { to: "/analysis", label: "Analysis" },
+    { to: "/tools", label: "Tools" },
     { to: "/memes", label: "Memes" },
     { to: "/glossary", label: "Glossary" },
   ];
