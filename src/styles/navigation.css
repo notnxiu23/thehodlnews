@@ -1,0 +1,30 @@
+.nav-tooltip {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 100%;
+  padding-top: 0.5rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover .nav-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nav-tooltip-content {
+  background: white;
+  color: #1a1a1a;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.dark .nav-tooltip-content {
+  background: #1a1a1a;
+  color: white;
+}
