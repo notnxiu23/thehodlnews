@@ -101,7 +101,7 @@ export function Header() {
           <div className="bg-white dark:bg-dark-800 rounded-xl shadow-xl w-full max-w-2xl h-[600px] flex flex-col">
             <div className="p-4 border-b dark:border-dark-700 flex items-center justify-between">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                Cryptocurrency Twitter Feed
+                Crypto Twitter Feed
               </h2>
               <button
                 onClick={() => setShowTwitterFeed(false)}
@@ -113,11 +113,11 @@ export function Header() {
             <div className="flex-1 overflow-hidden">
               <a
                 className="twitter-timeline"
-                href="https://twitter.com/hashtag/cryptocurrency"
+                href="https://twitter.com/i/lists/1758651805878034432"
                 data-theme="dark"
                 data-chrome="noheader nofooter noborders transparent"
               >
-                #Cryptocurrency Tweets
+                Crypto News Feed
               </a>
             </div>
           </div>
