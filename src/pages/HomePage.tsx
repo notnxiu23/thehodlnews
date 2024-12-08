@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Header } from '../components/Header';
+import { BreakingNews } from '../components/BreakingNews';
 import { CategoryFilter } from '../components/CategoryFilter';
 import { DateFilter, type DateRange } from '../components/DateFilter';
 import { NewsCard } from '../components/NewsCard';
@@ -165,6 +166,7 @@ export function HomePage() {
   return (
     <>
       <Header />
+      <BreakingNews />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">

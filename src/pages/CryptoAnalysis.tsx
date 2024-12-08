@@ -4,6 +4,7 @@ import { BackButton } from '../components/BackButton';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { fetchHistoricalPrices, generateInsights } from '../services/analysis';
 import { MarketOverview } from '../components/MarketOverview';
+import { TopMovers } from '../components/TopMovers';
 import toast from 'react-hot-toast';
 
 interface PriceData {
@@ -78,6 +79,14 @@ export function CryptoAnalysis() {
       <div className="space-y-8">
         {/* Market Overview Section */}
         <MarketOverview />
+
+        {/* Top Movers Section */}
+        <div className="bg-white dark:bg-dark-800 rounded-xl shadow-sm p-6">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+            Market Movers
+          </h2>
+          <TopMovers />
+        </div>
 
         {/* Price Analysis Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

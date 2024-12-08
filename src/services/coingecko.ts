@@ -38,6 +38,23 @@ export async function getTopCoins(limit = 50): Promise<MarketData[]> {
   }
 }
 
+export async function getTopMovers() {
+  try {
+    const response = await api.get('/coins/markets', {
+      params: {
+        vs_currency: 'usd',
+        order: 'price_change_percentage_24h_desc',
+        per_page: 100,
+        sparkline: false
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch top movers:', error);
+    throw error;
+  }
+}
+
 export async function getGlobalData(): Promise<GlobalData> {
   try {
     const response = await api.get('/global');
