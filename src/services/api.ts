@@ -2,7 +2,25 @@ import axios from 'axios';
 import type { Category, NewsArticle, CryptoPrice, TrendingTopic } from '../types';
 
 const CRYPTO_BASE_URL = 'https://min-api.cryptocompare.com/data';
-const CRYPTO_API_KEY = 'd7019dd9c4be2753e8f196ef673f196992f778b204bfc91aa84e0b6b80d17529';
+const CRYPTO_API_KEY = '313123e26b203f6f4aea65879f90266a43120f657ed6ca8ff8c1e5702f03989a';
+
+// Cache configuration
+const CACHE_DURATION = {
+  NEWS: 5 * 60 * 1000,      // 5 minutes
+  PRICES: 2 * 60 * 1000,    // 2 minutes
+  TRENDING: 15 * 60 * 1000  // 15 minutes
+};
+
+interface CacheItem<T> {
+  data: T;
+  timestamp: number;
+}
+
+const cache = {
+  news: new Map<string, CacheItem<NewsArticle[]>>(),
+  prices: new Map<string, CacheItem<CryptoPrice[]>>(),
+  trending: new Map<string, CacheItem<TrendingTopic[]>>()
+};
 
 const api = axios.create({
   baseURL: CRYPTO_BASE_URL,
@@ -10,6 +28,22 @@ const api = axios.create({
     'Authorization': `Apikey ${CRYPTO_API_KEY}`
   }
 });
+
+// Cache helper functions
+function getFromCache<T>(key: string, cacheMap: Map<string, CacheItem<T>>, duration: number): T | null {
+  const cached = cacheMap.get(key);
+  if (cached && Date.now() - cached.timestamp < duration) {
+    return cached.data;
+  }
+  return null;
+}
+
+function setCache<T>(key: string, data: T, cacheMap: Map<string, CacheItem<T>>) {
+  cacheMap.set(key, {
+    data,
+    timestamp: Date.now()
+  });
+}
 
 // Extract relevant tags from article text
 function extractTags(text: string): string[] {
@@ -21,11 +55,7 @@ function extractTags(text: string): string[] {
     mining: ['mining', 'miner', 'hash', 'pow'],
     regulation: ['regulation', 'sec', 'policy', 'compliance'],
     security: ['security', 'hack', 'exploit', 'vulnerability'],
-    market: ['market', 'price', 'trading', 'analysis'],
-    metaverse: ['metaverse', 'virtual', 'reality', 'avatar'],
-    web3: ['web3', 'dao', 'decentralized', 'governance'],
-    gaming: ['gaming', 'game', 'play-to-earn', 'p2e'],
-    institutional: ['institutional', 'investment', 'fund', 'adoption']
+    market: ['market', 'price', 'trading', 'analysis']
   };
 
   const tags = new Set<string>();
@@ -37,10 +67,6 @@ function extractTags(text: string): string[] {
     }
   });
 
-  const coinPattern = /\b(btc|eth|sol|ada|xrp|doge|dot)\b/gi;
-  const coins = text.match(coinPattern) || [];
-  coins.forEach(coin => tags.add(coin.toLowerCase()));
-
   return Array.from(tags);
 }
 
@@ -48,11 +74,11 @@ function extractTags(text: string): string[] {
 function analyzeSentiment(text: string): number {
   const positiveWords = [
     'bullish', 'surge', 'gain', 'rally', 'boost', 'soar', 'rise', 'growth',
-    'positive', 'breakthrough', 'adoption', 'success', 'partnership', 'launch'
+    'positive', 'breakthrough', 'adoption', 'success'
   ];
   const negativeWords = [
     'bearish', 'crash', 'drop', 'fall', 'decline', 'loss', 'risk', 'concern',
-    'negative', 'fail', 'scam', 'hack', 'ban', 'regulation', 'warning'
+    'negative', 'fail', 'scam', 'hack', 'ban'
   ];
 
   const words = text.toLowerCase().split(/\W+/);
@@ -74,6 +100,10 @@ function analyzeSentiment(text: string): number {
 }
 
 export async function fetchNews(category: Category): Promise<NewsArticle[]> {
+  const cacheKey = `news-${category}`;
+  const cachedNews = getFromCache(cacheKey, cache.news, CACHE_DURATION.NEWS);
+  if (cachedNews) return cachedNews;
+
   try {
     const categories: Record<Category, string> = {
       all: '',
@@ -81,21 +111,21 @@ export async function fetchNews(category: Category): Promise<NewsArticle[]> {
       bitcoin: 'BTC',
       ethereum: 'ETH',
       altcoins: 'XRP,ADA,DOT,SOL',
-      memecoins: 'DOGE,PEPE,FLOKI',
+      memecoins: 'DOGE,SHIB',
       mining: 'MINING',
       defi: 'DEFI',
       nft: 'NFT',
-      regulation: 'REGULATION,POLICY',
-      security: 'SCAM,HACK,SECURITY',
-      blockchain: 'BLOCKCHAIN,TECHNOLOGY,DEVELOPMENT',
-      exchange: 'EXCHANGE,BINANCE,COINBASE,KRAKEN',
-      airdrops: 'AIRDROP,GIVEAWAY',
-      ico: 'ICO,IDO,IEO,LAUNCH',
-      institutional: 'INSTITUTIONAL,ADOPTION,INVESTMENT,BLACKROCK,GRAYSCALE',
-      gaming: 'GAMING,P2E,GAMEFI,AXIE,SANDBOX',
-      metaverse: 'METAVERSE,VIRTUAL,DECENTRALAND,SANDBOX,ROBLOX',
-      community: 'COMMUNITY,EVENT,CONFERENCE,MEETUP,AMA',
-      web3: 'WEB3,DAO,DECENTRALIZATION,GOVERNANCE'
+      regulation: 'REGULATION',
+      security: 'SECURITY',
+      blockchain: 'BLOCKCHAIN',
+      exchange: 'EXCHANGE',
+      airdrops: 'AIRDROP',
+      ico: 'ICO',
+      institutional: 'INSTITUTIONAL',
+      gaming: 'GAMING',
+      metaverse: 'METAVERSE',
+      community: 'COMMUNITY',
+      web3: 'WEB3'
     };
 
     const response = await api.get('/v2/news/', {
@@ -113,7 +143,7 @@ export async function fetchNews(category: Category): Promise<NewsArticle[]> {
       throw new Error('Invalid response format from news API');
     }
 
-    return response.data.Data.map((article: any) => ({
+    const news = response.data.Data.map((article: any) => ({
       title: article.title,
       description: article.body,
       url: article.url,
@@ -125,6 +155,9 @@ export async function fetchNews(category: Category): Promise<NewsArticle[]> {
       sentiment: analyzeSentiment(article.title + ' ' + article.body),
       tags: extractTags(article.title + ' ' + article.body)
     }));
+
+    setCache(cacheKey, news, cache.news);
+    return news;
   } catch (error) {
     console.error('Error fetching news:', error);
     throw error;
@@ -132,6 +165,10 @@ export async function fetchNews(category: Category): Promise<NewsArticle[]> {
 }
 
 export async function fetchCryptoPrices(): Promise<CryptoPrice[]> {
+  const cacheKey = 'prices';
+  const cachedPrices = getFromCache(cacheKey, cache.prices, CACHE_DURATION.PRICES);
+  if (cachedPrices) return cachedPrices;
+
   try {
     const symbols = ['BTC', 'ETH', 'XRP', 'SOL', 'ADA', 'DOGE', 'LINK', 'DOT'];
     const response = await api.get('/pricemultifull', {
@@ -146,13 +183,16 @@ export async function fetchCryptoPrices(): Promise<CryptoPrice[]> {
       throw new Error('Invalid response format from price API');
     }
 
-    return Object.entries(response.data.RAW).map(([symbol, data]: [string, any]) => ({
+    const prices = Object.entries(response.data.RAW).map(([symbol, data]: [string, any]) => ({
       symbol,
       price: data.USD.PRICE,
       change24h: data.USD.CHANGEPCT24HOUR,
       marketCap: data.USD.MKTCAP,
       volume24h: data.USD.VOLUME24HOUR,
     }));
+
+    setCache(cacheKey, prices, cache.prices);
+    return prices;
   } catch (error) {
     console.error('Error fetching prices:', error);
     throw error;
@@ -160,6 +200,10 @@ export async function fetchCryptoPrices(): Promise<CryptoPrice[]> {
 }
 
 export async function fetchTrendingTopics(): Promise<TrendingTopic[]> {
+  const cacheKey = 'trending';
+  const cachedTopics = getFromCache(cacheKey, cache.trending, CACHE_DURATION.TRENDING);
+  if (cachedTopics) return cachedTopics;
+
   try {
     const response = await api.get('/v2/news/toplist', {
       params: {
@@ -182,7 +226,7 @@ export async function fetchTrendingTopics(): Promise<TrendingTopic[]> {
       const words = article.title
         .toLowerCase()
         .split(/\W+/)
-        .filter((word: string) => word.length > 3 && !['this', 'that', 'with', 'from'].includes(word));
+        .filter((word: string) => word.length > 3);
 
       const sentiment = analyzeSentiment(article.title + ' ' + article.body);
 
@@ -196,7 +240,7 @@ export async function fetchTrendingTopics(): Promise<TrendingTopic[]> {
       });
     });
 
-    return Array.from(topics.entries())
+    const trendingTopics = Array.from(topics.entries())
       .map(([topic, data]) => ({
         topic,
         sentiment: data.sentiment / data.count,
@@ -205,6 +249,9 @@ export async function fetchTrendingTopics(): Promise<TrendingTopic[]> {
       }))
       .sort((a, b) => b.volume - a.volume)
       .slice(0, 5);
+
+    setCache(cacheKey, trendingTopics, cache.trending);
+    return trendingTopics;
   } catch (error) {
     console.error('Error in fetchTrendingTopics:', error);
     throw error;

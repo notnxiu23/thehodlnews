@@ -34,17 +34,17 @@ export function BreakingNews() {
 
   useEffect(() => {
     loadBreakingNews();
-    // Refresh breaking news every minute
-    const interval = setInterval(loadBreakingNews, 60000);
+    // Refresh breaking news every 5 minutes instead of every minute
+    const interval = setInterval(loadBreakingNews, 300000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     if (breakingNews.length > 0) {
-      // Rotate through breaking news every 5 seconds
+      // Rotate through breaking news every 8 seconds instead of 5
       const rotationInterval = setInterval(() => {
         setCurrentIndex(prev => (prev + 1) % breakingNews.length);
-      }, 5000);
+      }, 8000);
       return () => clearInterval(rotationInterval);
     }
   }, [breakingNews.length]);
@@ -113,7 +113,7 @@ export function BreakingNews() {
       {/* Progress bar */}
       <div className="absolute bottom-0 left-0 h-0.5 bg-white/20 w-full">
         <div 
-          className="h-full bg-white/40 animate-[progress_5s_linear_infinite]"
+          className="h-full bg-white/40 animate-[progress_8s_linear_infinite]"
           style={{ width: '100%' }}
         />
       </div>
